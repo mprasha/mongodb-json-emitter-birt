@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.birt.report.engine.emitters">
+      <emitter
+            class="org.eclipse.birt.report.engine.emitter.mongodb.MongoDbEmitter"
+            format="MONGODB"
+            id="org.eclipse.birt.report.engine.emitter.mongodb.MongoDbEmitter"
+            mimeType="application/json">
+      </emitter>
+   </extension>
+
+</plugin>

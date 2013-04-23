@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: MongoDBEmitter
+Bundle-SymbolicName: MongoDBEmitter;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.eclipse.birt.report.engine.emitter.mongodb.activator.Activator
+Bundle-Vendor: Megha Nidhi Dahal
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.birt.report.engine,
+ org.mongodb.mongo-java-driver;bundle-version="2.10.1"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
