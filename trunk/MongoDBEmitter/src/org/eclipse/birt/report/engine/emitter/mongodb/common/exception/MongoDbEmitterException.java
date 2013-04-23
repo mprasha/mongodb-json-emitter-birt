@@ -1,0 +1,23 @@
+/*
+ * Copyright (c) 2013 Megha Nidhi Dahal. All rights reserved. 
+ * This program and the accompanying materials are made available under the terms of the 
+ * Eclipse Public License v1.0 which accompanies this distribution, and is available at 
+ * http://www.eclipse.org/legal/epl-v10.html 
+ * 
+ * Contributors: Megha Nidhi Dahal
+ */
+package org.eclipse.birt.report.engine.emitter.mongodb.common.exception;
+
+import org.eclipse.birt.core.exception.BirtException;
+
+public class MongoDbEmitterException extends BirtException {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public MongoDbEmitterException(String message) {
+		super(message);
+	}
+}
