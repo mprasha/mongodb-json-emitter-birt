@@ -152,7 +152,11 @@ public class MongoDbEmitter implements IContentEmitter {
 		// open connection to mongodb
 		try {
 			String serverAddress = (String) services.getRenderOption().getOption(MongoDbEmitterConstants.OPTION_MONGODB_HOST_ADDRESS);
-			Integer port = Integer.valueOf(services.getRenderOption().getOption(MongoDbEmitterConstants.OPTION_MONGODB_PORT).toString());
+			Integer port = 27017;
+			String portStr = (String) services.getRenderOption().getOption(MongoDbEmitterConstants.OPTION_MONGODB_PORT);
+			if (portStr != null || !"".equals(portStr.trim())) {
+				port = Integer.valueOf(portStr);
+			}
 			mongoClient = new MongoClient(serverAddress, port);
 			String dbName = (String) services.getRenderOption().getOption(MongoDbEmitterConstants.OPTION_MONGODB_DB_NAME);
 			mongoDatabase = mongoClient.getDB(dbName);
