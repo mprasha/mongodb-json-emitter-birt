@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JsonEmitter
-Bundle-SymbolicName: JsonEmitter;singleton:=true
+Bundle-SymbolicName: org.eclipse.birt.report.engine.emitter.json;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.eclipse.birt.report.engine.emitter.json.activator.Activator
 Require-Bundle: org.eclipse.core.runtime,
