@@ -6,6 +6,7 @@
       <emitter
             class="org.eclipse.birt.report.engine.emitter.mongodb.MongoDbEmitter"
             format="MONGODB"
+            icon="mongo.png"
             id="org.eclipse.birt.report.engine.emitter.mongodb.MongoDbEmitter"
             mimeType="application/json">
       </emitter>

@@ -55,8 +55,7 @@ public class JsonEmitter implements IContentEmitter {
 		try {
 			for (JSONObject jsonObj : jsonObjectList) {
 				outputStream.write(jsonObj.toJSONString().getBytes());
-				outputStream.write(System.getProperty("line.separator")
-						.getBytes());
+				outputStream.write(System.getProperty("line.separator").getBytes());
 			}
 		} catch (IOException e) {
 			throw new BirtException(e.getMessage());
@@ -135,8 +134,7 @@ public class JsonEmitter implements IContentEmitter {
 		if (outputDirectory == null || !outputDirectory.exists()) {
 			return;
 		}
-		fileName = fileName == null ? "table" + new Random().nextInt()
-				: fileName;
+		fileName = fileName == null ? "table" + new Random().nextInt() : fileName;
 		fileName = fileName + JsonEmitterConstants.JSON_FILE_EXTENSION;
 		OutputStream os = null;
 		try {
@@ -179,20 +177,17 @@ public class JsonEmitter implements IContentEmitter {
 	@Override
 	public void initialize(IEmitterServices services) throws BirtException {
 		// check the output stream
-		String outputDirectoryName = (String) services.getRenderOption()
-				.getOption(JsonEmitterConstants.RENDEROPTION_OUTPUT_DIR);
+		String outputDirectoryName = (String) services.getRenderOption().getOption(JsonEmitterConstants.RENDEROPTION_OUTPUT_DIR);
 		if (outputDirectoryName != null) {
 			outputDirectory = new File(outputDirectoryName);
 			outputDirectory.mkdirs();
 			if (!outputDirectory.exists()) {
-				throw new BirtException("Output directory doesn't exist."
-						+ outputDirectoryName);
+				throw new BirtException("Output directory doesn't exist." + outputDirectoryName);
 			}
 		} else {
 			outputStream = services.getRenderOption().getOutputStream();
 			if (outputStream == null) {
-				String outputFileName = services.getRenderOption()
-						.getOutputFileName();
+				String outputFileName = services.getRenderOption().getOutputFileName();
 				try {
 					outputStream = new FileOutputStream(outputFileName);
 				} catch (FileNotFoundException e) {

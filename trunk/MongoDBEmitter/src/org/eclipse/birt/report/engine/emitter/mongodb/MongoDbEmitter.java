@@ -35,6 +35,7 @@ import org.eclipse.birt.report.engine.content.ITableGroupContent;
 import org.eclipse.birt.report.engine.content.ITextContent;
 import org.eclipse.birt.report.engine.emitter.IContentEmitter;
 import org.eclipse.birt.report.engine.emitter.IEmitterServices;
+import org.eclipse.birt.report.engine.emitter.mongodb.common.MongoDbEmitterConstants;
 import org.eclipse.birt.report.engine.emitter.mongodb.common.exception.MongoDbEmitterException;
 import org.eclipse.birt.report.engine.ir.DataItemDesign;
 import org.eclipse.birt.report.engine.ir.ImageItemDesign;
@@ -44,6 +45,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.WriteResult;
 
 public class MongoDbEmitter implements IContentEmitter {
 
@@ -123,7 +125,8 @@ public class MongoDbEmitter implements IContentEmitter {
 		}
 		// write json object list to this table/collection
 		DBCollection collection = mongoDatabase.getCollection(tableName);
-		collection.insert(dbObjectList);
+		WriteResult result = collection.insert(dbObjectList);
+		result.getError();
 		dbObjectList.clear();
 	}
 
@@ -148,17 +151,19 @@ public class MongoDbEmitter implements IContentEmitter {
 	public void initialize(IEmitterServices services) throws BirtException {
 		// open connection to mongodb
 		try {
-			mongoClient = new MongoClient();
-			mongoDatabase = mongoClient.getDB("mydb");
-			boolean auth = mongoDatabase.authenticate("userName",
-					"password".toCharArray());
-			if (auth == false) {
-				throw new MongoDbEmitterException("Authentication Failed...");
-			}
+			String serverAddress = (String) services.getRenderOption().getOption(MongoDbEmitterConstants.OPTION_MONGODB_HOST_ADDRESS);
+			Integer port = Integer.valueOf(services.getRenderOption().getOption(MongoDbEmitterConstants.OPTION_MONGODB_PORT).toString());
+			mongoClient = new MongoClient(serverAddress, port);
+			String dbName = (String) services.getRenderOption().getOption(MongoDbEmitterConstants.OPTION_MONGODB_DB_NAME);
+			mongoDatabase = mongoClient.getDB(dbName);
+			/*
+			 * boolean auth = mongoDatabase.authenticate("userName",
+			 * "password".toCharArray()); if (auth == false) { throw new
+			 * MongoDbEmitterException("Authentication Failed..."); }
+			 */
 		} catch (UnknownHostException e) {
 			throw new BirtException(e.getMessage());
 		}
-
 	}
 
 	@Override
@@ -193,13 +198,12 @@ public class MongoDbEmitter implements IContentEmitter {
 	@Override
 	public void startData(IDataContent data) throws BirtException {
 		DataItemDesign dataItemDesign = (DataItemDesign) data.getGenerateBy();
-		dbObject.put(dataItemDesign.getBindingColumn(), data.getText());
+		dbObject.put(dataItemDesign.getBindingColumn(), data.getValue());
 	}
 
 	@Override
-	public void startForeign(IForeignContent arg0) throws BirtException {
+	public void startForeign(IForeignContent foreignContent) throws BirtException {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
