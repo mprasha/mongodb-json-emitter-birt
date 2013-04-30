@@ -36,7 +36,6 @@ import org.eclipse.birt.report.engine.content.ITextContent;
 import org.eclipse.birt.report.engine.emitter.IContentEmitter;
 import org.eclipse.birt.report.engine.emitter.IEmitterServices;
 import org.eclipse.birt.report.engine.emitter.mongodb.common.MongoDbEmitterConstants;
-import org.eclipse.birt.report.engine.emitter.mongodb.common.exception.MongoDbEmitterException;
 import org.eclipse.birt.report.engine.ir.DataItemDesign;
 import org.eclipse.birt.report.engine.ir.ImageItemDesign;
 
@@ -154,7 +153,7 @@ public class MongoDbEmitter implements IContentEmitter {
 			String serverAddress = (String) services.getRenderOption().getOption(MongoDbEmitterConstants.OPTION_MONGODB_HOST_ADDRESS);
 			Integer port = 27017;
 			String portStr = (String) services.getRenderOption().getOption(MongoDbEmitterConstants.OPTION_MONGODB_PORT);
-			if (portStr != null || !"".equals(portStr.trim())) {
+			if (portStr != null && !"".equals(portStr.trim())) {
 				port = Integer.valueOf(portStr);
 			}
 			mongoClient = new MongoClient(serverAddress, port);
