@@ -12,6 +12,7 @@ package org.eclipse.birt.report.engine.emitter.mongodb;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.report.engine.content.IAutoTextContent;
@@ -39,17 +40,19 @@ import org.eclipse.birt.report.engine.emitter.mongodb.common.MongoDbEmitterConst
 import org.eclipse.birt.report.engine.ir.DataItemDesign;
 import org.eclipse.birt.report.engine.ir.ImageItemDesign;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
-import com.mongodb.WriteResult;
 
 public class MongoDbEmitter implements IContentEmitter {
 
 	private MongoClient mongoClient;
-	private List<DBObject> dbObjectList = new ArrayList<DBObject>();;
+	private List<DBObject> dbObjectList = new ArrayList<DBObject>();
+	private List<DBObject> groupObjectList = new ArrayList<DBObject>();
+	private Stack<DBObject> groupObjStack = new Stack<DBObject>();
 	private DBObject dbObject;
 	private DB mongoDatabase;
 
@@ -124,9 +127,15 @@ public class MongoDbEmitter implements IContentEmitter {
 		}
 		// write json object list to this table/collection
 		DBCollection collection = mongoDatabase.getCollection(tableName);
-		WriteResult result = collection.insert(dbObjectList);
-		result.getError();
-		dbObjectList.clear();
+		if (!dbObjectList.isEmpty()) {
+			collection.insert(dbObjectList);
+			dbObjectList.clear();
+		}
+		if(!groupObjectList.isEmpty())
+		{
+			collection.insert(groupObjectList);
+			groupObjectList.clear();
+		}
 	}
 
 	@Override
@@ -135,10 +144,22 @@ public class MongoDbEmitter implements IContentEmitter {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void endTableGroup(ITableGroupContent arg0) throws BirtException {
-		// TODO Auto-generated method stub
+		DBObject groupObj = groupObjStack.pop();
+		BasicDBList valueArray = new ArrayList<BasicDBList>(groupObj.toMap().values()).get(0);
+		valueArray.addAll(dbObjectList);
+		dbObjectList.clear();
 
+		if (groupObjStack.size() != 0) {
+			DBObject parentGrpObj = groupObjStack.pop();
+			valueArray = new ArrayList<BasicDBList>(parentGrpObj.toMap().values()).get(0);
+			valueArray.add(groupObj);
+			groupObjStack.push(parentGrpObj);
+		} else {
+			groupObjectList.add(groupObj);
+		}
 	}
 
 	@Override
@@ -267,9 +288,11 @@ public class MongoDbEmitter implements IContentEmitter {
 	}
 
 	@Override
-	public void startTableGroup(ITableGroupContent arg0) throws BirtException {
-		// TODO Auto-generated method stub
-
+	public void startTableGroup(ITableGroupContent tableGroup) throws BirtException {
+		BasicDBList dbArray = new BasicDBList();
+		DBObject groupObj = new BasicDBObject();
+		groupObj.put(tableGroup.getName(), dbArray);
+		groupObjStack.push(groupObj);
 	}
 
 	@Override

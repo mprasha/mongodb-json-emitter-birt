@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Stack;
 
 import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.report.engine.content.IAutoTextContent;
@@ -41,11 +42,14 @@ import org.eclipse.birt.report.engine.emitter.IContentEmitter;
 import org.eclipse.birt.report.engine.emitter.IEmitterServices;
 import org.eclipse.birt.report.engine.emitter.json.common.JsonEmitterConstants;
 import org.eclipse.birt.report.engine.ir.DataItemDesign;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class JsonEmitter implements IContentEmitter {
 
-	private List<JSONObject> jsonObjectList = new ArrayList<JSONObject>();;
+	private List<JSONObject> jsonObjectList = new ArrayList<JSONObject>();
+	private List<JSONObject> groupObjectList = new ArrayList<JSONObject>();
+	private Stack<JSONObject> groupObjStack = new Stack<JSONObject>();
 	private JSONObject jsonObject;
 	private OutputStream outputStream;
 	private File outputDirectory;
@@ -53,6 +57,10 @@ public class JsonEmitter implements IContentEmitter {
 	@Override
 	public void end(IReportContent arg0) throws BirtException {
 		try {
+			for (JSONObject jsonObj : groupObjectList) {
+				outputStream.write(jsonObj.toJSONString().getBytes());
+				outputStream.write(System.getProperty("line.separator").getBytes());
+			}
 			for (JSONObject jsonObj : jsonObjectList) {
 				outputStream.write(jsonObj.toJSONString().getBytes());
 				outputStream.write(System.getProperty("line.separator").getBytes());
@@ -139,6 +147,13 @@ public class JsonEmitter implements IContentEmitter {
 		OutputStream os = null;
 		try {
 			os = new FileOutputStream(new File(outputDirectory, fileName));
+
+			for (JSONObject jsonObj : groupObjectList) {
+				os.write(jsonObj.toJSONString().getBytes());
+				os.write(System.getProperty("line.separator").getBytes());
+			}
+			groupObjectList.clear();
+
 			for (JSONObject jsonObj : jsonObjectList) {
 				os.write(jsonObj.toJSONString().getBytes());
 				os.write(System.getProperty("line.separator").getBytes());
@@ -163,10 +178,22 @@ public class JsonEmitter implements IContentEmitter {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void endTableGroup(ITableGroupContent arg0) throws BirtException {
-		// TODO Auto-generated method stub
+	public void endTableGroup(ITableGroupContent tableGroup) throws BirtException {
+		JSONObject groupObj = groupObjStack.pop();
+		JSONArray valueArray = new ArrayList<JSONArray>(groupObj.values()).get(0);
+		valueArray.addAll(jsonObjectList);
+		jsonObjectList.clear();
 
+		if (groupObjStack.size() != 0) {
+			JSONObject parentGrpObj = groupObjStack.pop();
+			valueArray = new ArrayList<JSONArray>(parentGrpObj.values()).get(0);
+			valueArray.add(groupObj);
+			groupObjStack.push(parentGrpObj);
+		} else {
+			groupObjectList.add(groupObj);
+		}
 	}
 
 	@Override
@@ -228,6 +255,7 @@ public class JsonEmitter implements IContentEmitter {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void startData(IDataContent data) throws BirtException {
 		if (data == null || data.getValue() == null) {
@@ -244,8 +272,7 @@ public class JsonEmitter implements IContentEmitter {
 	}
 
 	@Override
-	public void startGroup(IGroupContent arg0) throws BirtException {
-		// TODO Auto-generated method stub
+	public void startGroup(IGroupContent groupContent) throws BirtException {
 
 	}
 
@@ -256,8 +283,7 @@ public class JsonEmitter implements IContentEmitter {
 	}
 
 	@Override
-	public void startLabel(ILabelContent arg0) throws BirtException {
-		// TODO Auto-generated method stub
+	public void startLabel(ILabelContent labelContent) throws BirtException {
 
 	}
 
@@ -300,10 +326,13 @@ public class JsonEmitter implements IContentEmitter {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void startTableGroup(ITableGroupContent arg0) throws BirtException {
-		// TODO Auto-generated method stub
-
+	public void startTableGroup(ITableGroupContent tableGroup) throws BirtException {
+		JSONArray jsonArray = new JSONArray();
+		JSONObject groupObj = new JSONObject();
+		groupObj.put(tableGroup.getName(), jsonArray);
+		groupObjStack.push(groupObj);
 	}
 
 	@Override
